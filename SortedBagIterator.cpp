@@ -1,7 +1,6 @@
 #include "SortedBagIterator.h"
 #include "SortedBag.h"
 #include <exception>
-#include <cstring>
 #include <algorithm>
 
 using namespace std;
