@@ -299,7 +299,7 @@ void testAllExtended() {
 	testCreate();
 	testAdd(relation2);
 	testAdd(relation3);	
-	testRemove(relation2);
+    testRemove(relation2);
 	testRemove(relation3);
 	testIterator(relation2);
 	testIterator(relation3);

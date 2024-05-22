@@ -6,7 +6,7 @@
 
 SortedBag::SortedBag(Relation r) {
     this->r=r;
-    capacityOfArray=10;
+    capacityOfArray=200;
     elements=new Node[capacityOfArray];
     firstEmpty=0;
     sizeOfBag=0;
@@ -57,6 +57,7 @@ void SortedBag::resize() {
                 }
                 newElements[current].next = localFirstEmpty;
                 newElements[localFirstEmpty].data = elements[i].data;
+                newElements[localFirstEmpty].next = -1;
                 for(int j=firstEmpty;j<capacityOfArray;j++) {
                     if (newElements[j].data==NULL_TCOMP) {
                         localFirstEmpty=j;
@@ -73,7 +74,6 @@ void SortedBag::resize() {
         }
     }
 
-    delete[] elements;
     elements = newElements;
     firstEmpty = localFirstEmpty;
 }
@@ -96,6 +96,10 @@ void SortedBag::add(TComp e) {
     while (elements[current].next!=-1)
         current=elements[current].next;
 
+    //extra stuff
+    if(firstEmpty!=NULL_TCOMP)
+        setNextEmpty();
+
     elements[firstEmpty].data=e;
     elements[firstEmpty].next=-1;
     elements[current].next=firstEmpty;
@@ -106,42 +110,68 @@ void SortedBag::add(TComp e) {
 bool SortedBag::remove(TComp e) {
     int index=hash(e);
     //if the element is the first and the only one in the list with that hash, just remove it
-    if(e==2){
-        int a=capacityOfArray;
-        std::cout<<std::endl;
-        for(int i=0;i<a;i++){
-            if(elements[i].data!=NULL_TCOMP){
-                std::cout<<i<<" "<<elements[i].data<<" "<<elements[i].next<<std::endl;
-            }
-        }
-        std::cout<<std::endl;
-    }
     if(elements[index].data==NULL_TCOMP) {
         return false;
     }
     if(elements[index].data==e && elements[index].next==-1) {
         elements[index].data=NULL_TCOMP;
+        elements[index].next=-1;
         sizeOfBag--;
+        if(index<firstEmpty)
+            firstEmpty=index;
         return true;
     }
-    int previous=-1;
-    int current=index;
-    while(current!=-1) {
-        if(elements[current].data==e) {
-            if(previous==-1) {
-                elements[current].data=NULL_TCOMP;
-                sizeOfBag--;
-                return true;
-            }
-            elements[previous].next=elements[current].next;
-            elements[current].data=NULL_TCOMP;
-            sizeOfBag--;
-            return true;
-        }
-        previous=current;
-        current=elements[current].next;
+    struct{
+        int prev;
+        int current;
+    }e1,e2;
+    //e1, e2 positions with previos and current element
+
+    //search for the element
+    e1.current=index;
+    e1.prev=-1;
+    while(e1.current!=-1 && elements[e1.current].data!=e) {
+        e1.prev=e1.current;
+        e1.current=elements[e1.current].next;
     }
-    return false;
+    //if the element is not in the list
+    if(e1.current==-1) {
+        return false;
+    }
+    //element is in the list on the position e1.current
+
+    e2.prev=e1.current;
+    e2.current=elements[e1.current].next;
+    //search another element with the same hash value as e
+    bool over=false;
+    do{
+        e2.prev=e1.current;
+        e2.current=elements[e1.current].next;
+        while(e2.current!=-1 && hash(elements[e2.current].data)!=index) {
+            e2.prev=e2.current;
+            e2.current=elements[e2.current].next;
+        }
+        //if there is no other element with the same hash value as e
+        if(e2.current==-1) {
+            over=true;
+            break;
+        }
+        //there is another element with the same hash value as e
+        elements[e1.current].data=elements[e2.current].data;
+        e1=e2;
+    }while (!over);
+   /*
+    * e1 is the last element with the same hash value as e
+    * e2.current is -1
+    * e2.prev is the last element
+    */
+    elements[e1.current].data=NULL_TCOMP;
+    elements[e1.current].next=-1;
+    if(e1.current<firstEmpty)
+        firstEmpty=e1.current;
+    sizeOfBag--;
+    return true;
+
 }
 
 
@@ -188,5 +218,4 @@ SortedBagIterator SortedBag::iterator() const {
 
 
 SortedBag::~SortedBag() {
-    delete[] elements;
 }
