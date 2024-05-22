@@ -5,8 +5,8 @@
 #include "SortedBagIterator.h"
 
 SortedBag::SortedBag(Relation r) {
-	this->r=r;
-    capacityOfArray=15;
+    this->r=r;
+    capacityOfArray=10;
     elements=new Node[capacityOfArray];
     firstEmpty=0;
     sizeOfBag=0;
@@ -42,6 +42,14 @@ void SortedBag::resize() {
         if (elements[i].data != NULL_TCOMP) {
             if (newElements[index].data == NULL_TCOMP) {
                 newElements[index].data = elements[i].data;
+                newElements[index].next = -1;
+                //set the first empty position
+                for(int j=firstEmpty;j<capacityOfArray;j++) {
+                    if (newElements[j].data==NULL_TCOMP) {
+                        localFirstEmpty=j;
+                        break;
+                    }
+                }
             } else {
                 int current = index;
                 while (newElements[current].next != -1) {
@@ -64,10 +72,11 @@ void SortedBag::resize() {
             }
         }
     }
-        delete[] elements;
-        elements = newElements;
-        firstEmpty = localFirstEmpty;
-    }
+
+    delete[] elements;
+    elements = newElements;
+    firstEmpty = localFirstEmpty;
+}
 
 void SortedBag::add(TComp e) {
     int index=hash(e);
@@ -86,6 +95,7 @@ void SortedBag::add(TComp e) {
     int current=index;
     while (elements[current].next!=-1)
         current=elements[current].next;
+
     elements[firstEmpty].data=e;
     elements[firstEmpty].next=-1;
     elements[current].next=firstEmpty;
@@ -94,54 +104,44 @@ void SortedBag::add(TComp e) {
 
 
 bool SortedBag::remove(TComp e) {
-    int pos=hash(e);
-    int prevpos=-1;
-    //search for the element in the bag
-    while(pos!=-1 and elements[pos].data!=e) {
-        prevpos=pos;
-        pos=elements[pos].next;
+    int index=hash(e);
+    //if the element is the first and the only one in the list with that hash, just remove it
+    if(e==2){
+        int a=capacityOfArray;
+        std::cout<<std::endl;
+        for(int i=0;i<a;i++){
+            if(elements[i].data!=NULL_TCOMP){
+                std::cout<<i<<" "<<elements[i].data<<" "<<elements[i].next<<std::endl;
+            }
+        }
+        std::cout<<std::endl;
     }
-    if(pos==-1) {
+    if(elements[index].data==NULL_TCOMP) {
         return false;
     }
-    //we know that the element is in the bag
-    sizeOfBag--;
-    bool over=false;
-    do{
-        int p=elements[pos].next;
-        int pp=pos;
-        while(p!=-1 and hash(elements[pos].data)!=pos ) {
-            pp=p;
-            p=elements[p].next;
-        }
-        if(p==-1) {
-            over=true;
-        }
-        else{
-            elements[pos].data=elements[p].data;
-            pos=p;
-        }
-    } while (!over);
-    if(prevpos==-1) {
-        auto idx=0;
-        while(idx<capacityOfArray and prevpos==-1) {
-            if(elements[idx].next==e) {
-                prevpos=idx;
+    if(elements[index].data==e && elements[index].next==-1) {
+        elements[index].data=NULL_TCOMP;
+        sizeOfBag--;
+        return true;
+    }
+    int previous=-1;
+    int current=index;
+    while(current!=-1) {
+        if(elements[current].data==e) {
+            if(previous==-1) {
+                elements[current].data=NULL_TCOMP;
+                sizeOfBag--;
+                return true;
             }
-            else {
-                idx++;
-            }
+            elements[previous].next=elements[current].next;
+            elements[current].data=NULL_TCOMP;
+            sizeOfBag--;
+            return true;
         }
+        previous=current;
+        current=elements[current].next;
     }
-    if(prevpos!=-1) {
-        elements[prevpos].next=elements[pos].next;
-    }
-    elements[pos].data=NULL_TCOMP;
-    elements[pos].next=-1;
-    if(firstEmpty>pos) {
-        firstEmpty=pos;
-    }
-    return true;
+    return false;
 }
 
 
@@ -183,10 +183,10 @@ bool SortedBag::isEmpty() const {
 
 
 SortedBagIterator SortedBag::iterator() const {
-	return SortedBagIterator(*this);
+    return SortedBagIterator(*this);
 }
 
 
 SortedBag::~SortedBag() {
-	delete[] elements;
+    delete[] elements;
 }
