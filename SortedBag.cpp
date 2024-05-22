@@ -160,11 +160,7 @@ bool SortedBag::remove(TComp e) {
         elements[e1.current].data=elements[e2.current].data;
         e1=e2;
     }while (!over);
-   /*
-    * e1 is the last element with the same hash value as e
-    * e2.current is -1
-    * e2.prev is the last element
-    */
+
     elements[e1.current].data=NULL_TCOMP;
     elements[e1.current].next=-1;
     if(e1.current<firstEmpty)
