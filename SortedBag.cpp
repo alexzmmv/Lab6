@@ -108,6 +108,10 @@ void SortedBag::add(TComp e) {
 
 
 bool SortedBag::remove(TComp e) {
+    //tried to remove an element from an empty bag
+    //it works, but not completely
+    //tried to copy the code from the lecture
+    //it doesn't work at all
     int index=hash(e);
     //if the element is the first and the only one in the list with that hash, just remove it
     if(elements[index].data==NULL_TCOMP) {
