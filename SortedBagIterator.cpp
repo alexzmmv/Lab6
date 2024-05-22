@@ -6,14 +6,14 @@
 using namespace std;
 
 SortedBagIterator::SortedBagIterator(const SortedBag& b) : bag(b) {
-    elements = new TComp[b.capacityOfArray];
-    int eIn=0;
+    elements = new TComp[b.sizeOfBag+2];
+    this->eIn=0;
     for(int i=0;i<b.capacityOfArray;i++) {
         if(b.elements[i].data!=NULL_TCOMP)
             elements[eIn++]=b.elements[i].data;
     }
     current_index=0;
-    sort(elements,elements+b.sizeOfBag, bag.r);
+    sort(elements,elements+eIn, bag.r);
 }
 
 TComp SortedBagIterator::getCurrent() {
@@ -23,7 +23,7 @@ TComp SortedBagIterator::getCurrent() {
 }
 
 bool SortedBagIterator::valid() {
-    return current_index<bag.sizeOfBag;
+    return current_index<eIn;
 }
 
 void SortedBagIterator::next() {

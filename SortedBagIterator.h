@@ -13,6 +13,7 @@ private:
 
     int current_index;
     TComp *elements;
+    int eIn;
 
 public:
 	TComp getCurrent();
